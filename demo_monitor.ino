@@ -6,9 +6,6 @@
 #include <SPI.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
-#include "Logo_w.h"               // logo must be R5G6B5, 16bit
-#include "Drop_img.h"
-#include "Logo_w_small.h"
 
 // Display
 #define SPI_SCLK 4   // SLK
@@ -20,13 +17,20 @@
 #define DISP_POW 20  // display power pin
 #define DISP_RST 3
 
-// Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP);
 Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, DISP_RST);
-// Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, SPI_MOSI, SPI_SCLK, -1, SPI_MISO);   // much slower for some reason (it bitbangs it i think)
 
-#include "AvenirNextLTPro_Regular16pt7b.h"
-#include "AvenirNextLTPro_Regular12pt7b.h"
+// generated with lcd-image-converter.exe
+// output must be R5G6B5, 16bit
+#include "Logo_w.h"               
+#include "Drop_img.h"
+#include "Logo_w_small.h"
+
+// generated with https://rop.nl/truetype2gfx/
 #include "AvenirNextLTPro_Regular8pt7b.h"
+#include "AvenirNextLTPro_Regular12pt7b.h"
+#include "AvenirNextLTPro_Regular16pt7b.h"
+#include "AvenirNextLTPro_Regular24pt7b.h"
+#include "AvenirNextLTPro_Regular28pt7b.h"
 
 #define ILI9341_Custom_B tft.color565(39,47,83)
 
@@ -76,18 +80,18 @@ void setup(void) {
 
   pinMode(DISP_LED, OUTPUT);
   pinMode(DISP_POW, OUTPUT);
-  digitalWrite(DISP_LED, 0);
-  digitalWrite(DISP_POW, 0);
+  digitalWrite(DISP_LED, 1);
+  digitalWrite(DISP_POW, 1);
   delay(5);
 
   // Display
-  digitalWrite(DISP_POW,1);
+  // digitalWrite(DISP_POW,1);
   tft.begin();
   tft.setRotation(2);
   tft.fillScreen(ILI9341_WHITE);
-  fadePWM(DISP_LED, true, 500);
+  // fadePWM(DISP_LED, true, 500);
 
-  ScreenState = TUTORIAL_1;
+  ScreenState = RESULTS;
 }
 
 /**************************************************************************/
@@ -319,13 +323,54 @@ void loop(void) {
           tft.setCursor( 35,235);   tft.print("Measuring...");
           break;
       }
-      delay(1000);
+      delay(333);
       MeasuringState = MeasuringState + 1;
       if(MeasuringState == 3){
         MeasuringState = 0;
         ScreenState = RESULTS;
         dispDrawn = 0;
       }
+      break;
+
+    case RESULTS:
+      if(dispDrawn==0){
+        tft.fillScreen(ILI9341_WHITE);
+        tft.fillRect(0,0,240,45,ILI9341_Custom_B);
+
+        tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_WHITE,ILI9341_Custom_B);
+        tft.setCursor( 35, 26);   tft.print("Measurement complete!");
+
+        tft.fillCircle( 32,200, 6,tft.color565(211,126,136));
+        tft.fillCircle( 57,200, 8,tft.color565(229,190,135));
+        tft.fillCircle( 84,200,10,tft.color565(166,196,153));
+        tft.fillCircle(120,200,12,tft.color565(160,188,176));
+        tft.fillCircle(156,200,10,tft.color565(166,196,153));
+        tft.fillCircle(183,200, 8,tft.color565(229,190,135));
+        tft.fillCircle(208,200, 6,tft.color565(211,126,136));
+
+        tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+        tft.setCursor(158,127);   tft.print("mmol/L");
+        tft.setCursor( 40,249);   tft.print("Click to save and finish");
+
+        // now draw the variable parts
+        float measured_result = 2.0 + ((float)random(0, 10000) / 10000.0) * (5.0 - 2.0);
+        String str = String(measured_result,2);
+
+        tft.setFont(&AvenirNextLTPro_Regular28pt7b);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+        tft.setCursor(30,152);   tft.print(str);
+
+        int triangle_pos = map(measured_result, 1,6,32,208);
+        tft.fillTriangle(triangle_pos-4, 178, triangle_pos+4, 178, triangle_pos, 184, ILI9341_BLACK);
+
+      }
+      dispDrawn = 1;
+      // delay(750);
+      break;
+
+    case PREV_RESULTS:
       break;
   }
 
