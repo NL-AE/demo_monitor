@@ -26,6 +26,8 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, DISP_RST);
 #include "AvenirNextLTPro_Regular12pt7b.h"
 #include "AvenirNextLTPro_Regular8pt7b.h"
 
+#define ILI9341_Custom_B tft.color565(39,47,83)
+
 // Variables
 enum ScreenState{
   WELCOME,
@@ -80,8 +82,10 @@ void setup(void) {
   digitalWrite(DISP_POW,1);
   tft.begin();
   tft.setRotation(2);
-  tft.fillScreen(ILI9341_WHITE);;
-  // fadePWM(DISP_LED, true, 500);
+  tft.fillScreen(ILI9341_WHITE);
+  fadePWM(DISP_LED, true, 500);
+
+  ScreenState = TUTORIAL_1;
 }
 
 /**************************************************************************/
@@ -179,14 +183,26 @@ void loop(void) {
     case TUTORIAL_1:
       if(dispDrawn==0){
         tft.fillScreen(ILI9341_WHITE);
-        tft.fillRect(0,181,240,133,ILI9341_WHITE);
+        tft.fillRect(0,0,240,45,ILI9341_Custom_B);
 
         tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_WHITE,ILI9341_Custom_B);
+        tft.setCursor( 23, 26);   tft.print("To take your measurement");
+
+        // draw image using primitives
+        tft.drawRoundRect(59, 80,122,61, 8, ILI9341_Custom_B);
+        tft.drawRoundRect(60, 81,120,59, 7, ILI9341_Custom_B);
+        tft.fillRect(0, 80, 240, 10, ILI9341_WHITE);
+
+        tft.drawRect(80, 139, 29, 61, ILI9341_Custom_B);
+        tft.drawRect(81, 140, 27, 59, ILI9341_Custom_B);
+
+        tft.drawRect(85, 182, 19, 13, ILI9341_Custom_B);
+
         tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
-        tft.setCursor( 46,209);   tft.print("Take measurements");
-        tft.setCursor( 46,234);   tft.print("See previous results");
-        tft.setCursor( 46,258);   tft.print("Connect to phone");
-        tft.setCursor( 46,282);   tft.print("Settings");
+        tft.setCursor( 34,245);   tft.print("1. Insert strip into device");
+
+        tft.setCursor( 60,290);   tft.print("Click to continue");
       }
       dispDrawn = 1;
       break;
