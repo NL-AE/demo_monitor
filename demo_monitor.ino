@@ -112,12 +112,12 @@ void loop(void) {
       }
       dispDrawn = 1;
 
-      // // wait
-      // delay(1000);
+      // wait
+      delay(1000);
 
-      // // transition to next screen
-      // ScreenState = WELCOME_MENU;
-      // dispDrawn = 0;
+      // transition to next screen
+      ScreenState = WELCOME_MENU;
+      dispDrawn = 0;
 
       break;
 
@@ -125,28 +125,70 @@ void loop(void) {
       // draw screen
       if(dispDrawn==0){
         // remove prev text
-        tft.fillRect(0,181,240,133,ILI9341_BLACK);
+        tft.fillRect(0,181,240,133,ILI9341_WHITE);
 
-        tft.setFont(&AvenirNextLTPro_Regular16pt7b);
-        tft.setTextColor(ILI9341_WHITE,ILI9341_BLACK);
-        tft.setCursor( 46,214);   tft.print("Take measurements");
-        tft.setCursor( 46,238);   tft.print("See previous results");
-        tft.setCursor( 46,262);   tft.print("Connect to phone");
-        tft.setCursor( 46,286);   tft.print("Settings");
+        tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+        tft.setCursor( 46,209);   tft.print("Take measurements");
+        tft.setCursor( 46,234);   tft.print("See previous results");
+        tft.setCursor( 46,258);   tft.print("Connect to phone");
+        tft.setCursor( 46,282);   tft.print("Settings");
       }
       dispDrawn = 1;
 
       switch(cursor_pos){
         case 0:
+          tft.fillTriangle(29, 198, 29, 208, 34, 203, ILI9341_BLACK);
+          tft.fillTriangle(29, 223, 29, 233, 34, 228, ILI9341_WHITE);
+          tft.fillTriangle(29, 248, 29, 258, 34, 253, ILI9341_WHITE);
+          tft.fillTriangle(29, 273, 29, 283, 34, 278, ILI9341_WHITE);
           break;
+
         case 1:
+          tft.fillTriangle(29, 198, 29, 208, 34, 203, ILI9341_WHITE);
+          tft.fillTriangle(29, 223, 29, 233, 34, 228, ILI9341_BLACK);
+          tft.fillTriangle(29, 248, 29, 258, 34, 253, ILI9341_WHITE);
+          tft.fillTriangle(29, 273, 29, 283, 34, 278, ILI9341_WHITE);
           break;
+
         case 2:
+          tft.fillTriangle(29, 198, 29, 208, 34, 203, ILI9341_WHITE);
+          tft.fillTriangle(29, 223, 29, 233, 34, 228, ILI9341_WHITE);
+          tft.fillTriangle(29, 248, 29, 258, 34, 253, ILI9341_BLACK);
+          tft.fillTriangle(29, 273, 29, 283, 34, 278, ILI9341_WHITE);
           break;
+
         case 3:
+          tft.fillTriangle(29, 198, 29, 208, 34, 203, ILI9341_WHITE);
+          tft.fillTriangle(29, 223, 29, 233, 34, 228, ILI9341_WHITE);
+          tft.fillTriangle(29, 248, 29, 258, 34, 253, ILI9341_WHITE);
+          tft.fillTriangle(29, 273, 29, 283, 34, 278, ILI9341_BLACK);
           break;
       }
 
+      delay(1000);
+      cursor_pos = cursor_pos+1;
+      if(cursor_pos == 4){
+        cursor_pos = 0;
+        ScreenState = TUTORIAL_1;
+        dispDrawn = 0;
+      }
+
+      break;
+
+    case TUTORIAL_1:
+      if(dispDrawn==0){
+        tft.fillScreen(ILI9341_WHITE);
+        tft.fillRect(0,181,240,133,ILI9341_WHITE);
+
+        tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+        tft.setCursor( 46,209);   tft.print("Take measurements");
+        tft.setCursor( 46,234);   tft.print("See previous results");
+        tft.setCursor( 46,258);   tft.print("Connect to phone");
+        tft.setCursor( 46,282);   tft.print("Settings");
+      }
+      dispDrawn = 1;
       break;
   }
 
