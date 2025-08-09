@@ -8,6 +8,7 @@
 #include "Adafruit_ILI9341.h"
 #include "Logo_w.h"               // logo must be R5G6B5, 16bit
 #include "Drop_img.h"
+#include "Logo_w_small.h"
 
 // Display
 #define SPI_SCLK 4   // SLK
@@ -272,10 +273,32 @@ void loop(void) {
       if(dispDrawn==0){
         // clear previous drawing
         tft.fillRect(0, 45, 240, 220, ILI9341_WHITE);
+
+        // drawing
+        tft.drawRoundRect( 52, 90, 136, 136, 8, ILI9341_Custom_B);
+        tft.drawRoundRect( 72,112,  96, 112, 6, ILI9341_Custom_B);
+
+        tft.drawRoundRect(182,114,  9,  20, 3, ILI9341_Custom_B);
+        tft.fillRect(170,110,17,30,ILI9341_WHITE);
+
+        tft.drawLine(200,109,217, 93,ILI9341_Custom_B);
+        tft.drawLine(202,118,222,110,ILI9341_Custom_B);
+        tft.drawLine(203,128,225,126,ILI9341_Custom_B);
+
+        tft.fillRect(0,200,240,100,ILI9341_WHITE);
+
+        tft.drawRGBBitmap(88,128, LogoBitmap_w_small, LogoWid_w_small, LogoHei_w_small);
+
+        // text
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+        tft.setCursor( 30,245);   tft.print("3. Click button to measure");
       }
+      dispDrawn = 1;
+
+      delay(1000);
+      dispDrawn = 0;
+      ScreenState = MEASURING;
       break;
-      
-  
   }
 
   delay(10);
