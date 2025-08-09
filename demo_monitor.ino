@@ -37,7 +37,6 @@ enum ScreenState{
   TUTORIAL_1,
   TUTORIAL_2,
   TUTORIAL_3,
-  TUTORIAL_4,
   MEASURING,
   RESULTS,
   PREV_RESULTS
@@ -46,6 +45,7 @@ enum ScreenState{
 volatile int ScreenState = WELCOME;
 int dispDrawn = 0;
 volatile int cursor_pos = 0;
+volatile int MeasuringState = 0;
 
 void fadePWM(int pin, bool fadeIn, int fadeTimeMillis) {
   const int pwmMax = 255;
@@ -101,10 +101,7 @@ void loop(void) {
       if(dispDrawn==0){
         tft.fillScreen(ILI9341_WHITE);
 
-        Serial.print("Logo print (ms): ");
-        unsigned long start = millis();
         tft.drawRGBBitmap(46, 40, LogoBitmap_w, LogoWid_w, LogoHei_w);
-        Serial.println(millis() - start);
 
         tft.setFont(&AvenirNextLTPro_Regular16pt7b);
         tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
@@ -173,7 +170,7 @@ void loop(void) {
       }
 
       delay(1000);
-      cursor_pos = cursor_pos+1;
+      cursor_pos = cursor_pos + 1;
       if(cursor_pos == 4){
         cursor_pos = 0;
         ScreenState = TUTORIAL_1;
@@ -298,6 +295,37 @@ void loop(void) {
       delay(1000);
       dispDrawn = 0;
       ScreenState = MEASURING;
+      break;
+    
+    case MEASURING:
+      if(dispDrawn==0){
+        tft.fillScreen(ILI9341_WHITE);
+
+        tft.drawRGBBitmap(46, 40, LogoBitmap_w, LogoWid_w, LogoHei_w);
+
+        tft.setFont(&AvenirNextLTPro_Regular16pt7b);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+      }
+      dispDrawn = 1;
+
+      switch(MeasuringState){
+        case 0:
+          tft.setCursor( 35,235);   tft.print("Measuring.  ");
+          break;
+        case 1:
+          tft.setCursor( 35,235);   tft.print("Measuring.. ");
+          break;
+        case 2:
+          tft.setCursor( 35,235);   tft.print("Measuring...");
+          break;
+      }
+      delay(1000);
+      MeasuringState = MeasuringState + 1;
+      if(MeasuringState == 3){
+        MeasuringState = 0;
+        ScreenState = RESULTS;
+        dispDrawn = 0;
+      }
       break;
   }
 
