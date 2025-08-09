@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
-#include "Logo.h"
+#include "Logo_b.h"
 
 // Display
 #define SPI_SCLK 4   // SLK
@@ -97,7 +97,7 @@ void loop(void) {
 
         Serial.print("Logo print (ms): ");
         unsigned long start = millis();
-        tft.drawRGBBitmap(46, 40, LogoBitmap, LogoWid, LogoHei);
+        tft.drawRGBBitmap(46, 40, LogoBitmap_b, LogoWid_b, LogoHei_b);
         Serial.println(millis() - start);
 
         tft.setFont(&AvenirNextLTPro_Regular16pt7b);
