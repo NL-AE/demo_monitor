@@ -1,35 +1,66 @@
+
 // Includes
-// #include <string.h>
-// #include <math.h>
+#include <string.h>
+#include <math.h>
+#include <Arduino.h>
+#include <SPI.h>
+#include "Adafruit_GFX.h"
+#include "Adafruit_ILI9341.h"
+#include "Logo.h"
 
-// Pins
-#define TFT_BL 20
-#define TFT_POW x
+// Display
+#define SPI_SCLK 4   // SLK
+#define SPI_MOSI 6   // MOSI
+#define SPI_MISO 5   // MISO
+#define DISP_CSL 7   // chip select
+#define DISP_DCP 21  // direction control pin
+#define DISP_LED 10  // LED PWM pin
+#define DISP_POW 20  // display power pin
+#define DISP_RST 3
 
-// Screen
-#include <TFT_eSPI.h>
-#include "Logo_Bitmap.h"
-TFT_eSPI tft = TFT_eSPI();
+// Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP);
+Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, DISP_RST);
+// Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, SPI_MOSI, SPI_SCLK, -1, SPI_MISO);   // much slower for some reason (it bitbangs it i think)
+
+#include "AvenirNextLTPro_Regular16pt7b.h"
+#include "AvenirNextLTPro_Regular12pt7b.h"
+#include "AvenirNextLTPro_Regular8pt7b.h"
 
 // Variables
 enum ScreenState{
   WELCOME,
-  CLK_TO_MEASURE,
+  WELCOME_MENU,
+  TUTORIAL_1,
+  TUTORIAL_2,
+  TUTORIAL_3,
+  TUTORIAL_4,
   MEASURING,
   RESULTS,
-  SAVE_TO_PHONE,
-  SETTINGS_SELECT,
-  SETTINGS_LANG,
-  SETTINGS_UNIT,
-  SETTINGS_BRIGHTNESS,
-  SETTINGS_LIGHT_DARK_MODE,
-  SETTINGS_TEXT_SIZE,
-  SETTINGS_COLOR
+  PREV_RESULTS
 };
 
 volatile int ScreenState = WELCOME;
-volatile int ButOnState, ButUpState, ButDnState;
-// int dispDrawn = 0;
+int dispDrawn = 0;
+volatile int cursor_pos = 0;
+
+void fadePWM(int pin, bool fadeIn, int fadeTimeMillis) {
+  const int pwmMax = 255;
+  const int pwmMin = 0;
+
+  int startValue = fadeIn ? pwmMin : pwmMax;
+  int endValue = fadeIn ? pwmMax : pwmMin;
+
+  int stepCount = abs(endValue - startValue); // Number of steps (usually 255)
+  float delayPerStep = (float)fadeTimeMillis / stepCount;
+
+  for (int value = startValue; 
+       fadeIn ? (value <= endValue) : (value >= endValue); 
+       fadeIn ? value++ : value--) {
+    
+    analogWrite(pin, value);
+    delay(delayPerStep); // Wait a bit before the next step
+  }
+}
 
 /**************************************************************************/
 /*                                  SETUP                                 */
@@ -37,31 +68,20 @@ volatile int ButOnState, ButUpState, ButDnState;
 
 void setup(void) {
   // Serial
-  Serial.begin(115200);
-  delay(100);
+  // Serial.begin(115200);
 
-  Serial.println("Demo start");
-
-  // GPIO
-  pinMode(TFT_BL, OUTPUT);
-  digitalWrite(TFT_BL,0);
+  pinMode(DISP_LED, OUTPUT);
+  pinMode(DISP_POW, OUTPUT);
+  digitalWrite(DISP_LED, 0);
+  digitalWrite(DISP_POW, 0);
+  delay(5);
 
   // Display
-  tft.init();
-  tft.fillScreen(TFT_BLACK);
+  digitalWrite(DISP_POW,1);
+  tft.begin();
   tft.setRotation(2);
-
-  digitalWrite(TFT_BL,1);
-
-  // Setup
-  // attachInterrupt(digitalPinToInterrupt(BUT_ON), ISR_BUT_ON, FALLING);
-  // attachInterrupt(digitalPinToInterrupt(BUT_UP), ISR_BUT_UP, FALLING);
-  // attachInterrupt(digitalPinToInterrupt(BUT_DN), ISR_BUT_DN, FALLING);
-
-  // BLE
-
-  // Display
-  Serial.println("Setup complete");
+  tft.fillScreen(ILI9341_BLACK);;
+  // fadePWM(DISP_LED, true, 500);
 }
 
 /**************************************************************************/
@@ -69,75 +89,66 @@ void setup(void) {
 /**************************************************************************/
 
 void loop(void) {
-
   switch(ScreenState){
     case WELCOME:
-      tft.setTextSize(1);
-      tft.setTextColor(TFT_WHITE, TFT_BLACK);
+      // draw screen
+      if(dispDrawn==0){
+        tft.fillScreen(ILI9341_BLACK);
 
-      tft.drawXBitmap(46, 55, logo, logoWidth, logoHeight, TFT_WHITE);
+        Serial.print("Logo print (ms): ");
+        unsigned long start = millis();
+        tft.drawRGBBitmap(46, 40, LogoBitmap, LogoWid, LogoHei);
+        Serial.println(millis() - start);
 
-      // tft.drawBitmap(46, 55, LogoBitmap, LogoWid, LogoHei);
-      // tft.setFont(&AvenirNextLTPro_Regular16pt7b);
-      tft.setCursor( 50,230);   tft.print("Welcome");
-      // tft.setFont(&AvenirNextLTPro_Regular8pt7b);
-      tft.setCursor( 43,255);   tft.print("Please connect to the ");
-      tft.setCursor( 30,275);   tft.print("K Plus app to get started");
+        tft.setFont(&AvenirNextLTPro_Regular16pt7b);
+        tft.setTextColor(ILI9341_WHITE,ILI9341_BLACK);
+        tft.setCursor( 50,227);   tft.print("Welcome");
 
-      // Serial.println("State: WELCOME");
-      // // draw screen
-      // if(dispDrawn==0){tft.fillScreen(ILI9341_BLACK);}
-      // dispDrawn = 1;
+        tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_WHITE,ILI9341_BLACK);
+        tft.setCursor( 52,258);   tft.print("Click to get started");
 
-      // tft.drawRGBBitmap(46, 55, LogoBitmap, LogoWid, LogoHei);
-      // tft.setFont(&AvenirNextLTPro_Regular16pt7b);
-      // tft.setCursor( 50,230);   tft.print("Welcome");
-      // tft.setFont(&AvenirNextLTPro_Regular8pt7b);
-      // tft.setCursor( 43,255);   tft.print("Please connect to the ");
-      // tft.setCursor( 30,275);   tft.print("K Plus app to get started");
-      // break;
-    case CLK_TO_MEASURE:
-      // // draw screen
-      // if(dispDrawn==0){tft.fillScreen(ILI9341_BLACK);}
-      // dispDrawn = 1;
-      
-      // tft.drawRGBBitmap(46, 60, LogoBitmap, LogoWid, LogoHei);
-      // tft.setFont(&AvenirNextLTPro_Regular12pt7b);
-      // tft.setCursor( 30,250);   tft.print("Click to measure");
+        fadePWM(DISP_LED, true, 500);
+      }
+      dispDrawn = 1;
+
+      // // wait
+      // delay(1000);
+
+      // // transition to next screen
+      // ScreenState = WELCOME_MENU;
+      // dispDrawn = 0;
+
       break;
-    case MEASURING:
-      break;
-    case SETTINGS_SELECT:
-      break;
-    case SETTINGS_LANG:
-      break;
-    case SETTINGS_UNIT:
-      break;
-    case SETTINGS_BRIGHTNESS:
-      break;
-    case SETTINGS_LIGHT_DARK_MODE:
-      break;
-    case SETTINGS_TEXT_SIZE:
-      break;
-    case SETTINGS_COLOR:
+
+    case WELCOME_MENU:
+      // draw screen
+      if(dispDrawn==0){
+        // remove prev text
+        tft.fillRect(0,181,240,133,ILI9341_BLACK);
+
+        tft.setFont(&AvenirNextLTPro_Regular16pt7b);
+        tft.setTextColor(ILI9341_WHITE,ILI9341_BLACK);
+        tft.setCursor( 46,214);   tft.print("Take measurements");
+        tft.setCursor( 46,238);   tft.print("See previous results");
+        tft.setCursor( 46,262);   tft.print("Connect to phone");
+        tft.setCursor( 46,286);   tft.print("Settings");
+      }
+      dispDrawn = 1;
+
+      switch(cursor_pos){
+        case 0:
+          break;
+        case 1:
+          break;
+        case 2:
+          break;
+        case 3:
+          break;
+      }
+
       break;
   }
 
-  delay(100);
+  delay(10);
 }
-
-/**************************************************************************/
-/*                           Button Interrupts                            */
-/**************************************************************************/
-
-// void ISR_BUT_ON(void){
-//   ButOnState++;
-// }
-
-// void ISR_BUT_UP(void){
-//   ButUpState++;
-// }
-
-// void ISR_BUT_DN(void){
-//   ButDnState++;
-// }
