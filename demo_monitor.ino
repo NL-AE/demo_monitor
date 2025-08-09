@@ -7,6 +7,7 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 #include "Logo_w.h"               // logo must be R5G6B5, 16bit
+#include "Drop_img.h"
 
 // Display
 #define SPI_SCLK 4   // SLK
@@ -191,10 +192,10 @@ void loop(void) {
 
         // draw image using primitives
         tft.drawRoundRect(59, 80,122,61, 8, ILI9341_Custom_B);
-        tft.drawRoundRect(60, 81,120,59, 7, ILI9341_Custom_B);
+        // tft.drawRoundRect(60, 81,120,59, 7, ILI9341_Custom_B);
         tft.fillRect(0, 80, 240, 10, ILI9341_WHITE);
 
-        tft.drawRect(80, 139, 29, 61, ILI9341_Custom_B);
+        // tft.drawRect(80, 139, 29, 61, ILI9341_Custom_B);
         tft.drawRect(81, 140, 27, 59, ILI9341_Custom_B);
 
         tft.drawRect(85, 182, 19, 13, ILI9341_Custom_B);
@@ -205,7 +206,76 @@ void loop(void) {
         tft.setCursor( 60,290);   tft.print("Click to continue");
       }
       dispDrawn = 1;
+      delay(1000);
+      ScreenState = TUTORIAL_2;
+      dispDrawn = 0;
       break;
+
+    case TUTORIAL_2:
+      if(dispDrawn==0){
+        // clear previous drawing
+        tft.fillRect(0, 45, 240, 220, ILI9341_WHITE);
+
+        // draw image using primitives
+        tft.drawLine( 67, 130, 196, 171, ILI9341_Custom_B);   // strip top
+        tft.drawLine(196, 171, 196, 180, ILI9341_Custom_B);   // strip right corner vertical
+        tft.drawLine(196, 171, 158, 195, ILI9341_Custom_B);   // strip front up
+        tft.drawLine(196, 180, 158, 204, ILI9341_Custom_B);   // strip front bottom
+        tft.drawLine(158, 195, 158, 204, ILI9341_Custom_B);   // strip bottom corner vertical
+        tft.drawLine(158, 195,  41, 161, ILI9341_Custom_B);   // strip left top
+        tft.drawLine(158, 204,  41, 170, ILI9341_Custom_B);   // strip left bottom
+
+        // collection area
+        tft.drawLine(157, 164, 184, 173, ILI9341_Custom_B);   // top right
+        tft.drawLine(184, 173, 156, 190, ILI9341_Custom_B);   // buttom right
+        tft.drawLine(156, 190, 129, 182, ILI9341_Custom_B);   // bottom left
+        tft.drawLine(129, 182, 157, 164, ILI9341_Custom_B);   // top left
+        tft.drawLine(157, 164, 157, 170, ILI9341_Custom_B);   // inside corner vertical
+        tft.drawLine(157, 170, 134, 184, ILI9341_Custom_B);   // inside corner top left
+        tft.drawLine(157, 170, 177, 176, ILI9341_Custom_B);   // inside corner top right
+
+        // fill in rectangle
+        for (int y = 170; y <= 190; y++) {
+            float leftX, rightX;
+
+            if (y <= 184) { // left edge is AB
+                leftX = 157 + (134 - 157) * (float)(y - 170) / (184 - 170);
+            } else { // left edge is BC
+                leftX = 134 + (156 - 134) * (float)(y - 184) / (190 - 184);
+            }
+
+            if (y <= 176) { // right edge is CA
+                rightX = 177 + (157 - 177) * (float)(y - 176) / (170 - 176);
+            } else { // right edge is CD
+                rightX = 156 + (177 - 156) * (float)(y - 190) / (176 - 190);
+            }
+
+            // Draw horizontal line
+            tft.drawLine((int)ceil(leftX), y, (int)ceil(rightX), y, ILI9341_Custom_B);
+        }
+
+        tft.drawRGBBitmap(145, 90, Drop_img_bitmap, Drop_img_Wid_b, Drop_img_Hei_b);
+        
+        // text
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+        tft.setCursor( 37,245);   tft.print("2. Drop sample into area");
+
+        tft.setCursor( 60,290);   tft.print("Click to continue");
+      }
+      dispDrawn = 1;
+      delay(1000);
+      ScreenState = TUTORIAL_3;
+      dispDrawn = 0;
+      break;
+
+    case TUTORIAL_3:
+      if(dispDrawn==0){
+        // clear previous drawing
+        tft.fillRect(0, 45, 240, 220, ILI9341_WHITE);
+      }
+      break;
+      
+  
   }
 
   delay(10);
