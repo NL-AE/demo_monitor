@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
-#include "Logo_b.h"
+#include "Logo_w.h"               // logo must be R5G6B5, 16bit
 
 // Display
 #define SPI_SCLK 4   // SLK
@@ -80,7 +80,7 @@ void setup(void) {
   digitalWrite(DISP_POW,1);
   tft.begin();
   tft.setRotation(2);
-  tft.fillScreen(ILI9341_BLACK);;
+  tft.fillScreen(ILI9341_WHITE);;
   // fadePWM(DISP_LED, true, 500);
 }
 
@@ -93,19 +93,19 @@ void loop(void) {
     case WELCOME:
       // draw screen
       if(dispDrawn==0){
-        tft.fillScreen(ILI9341_BLACK);
+        tft.fillScreen(ILI9341_WHITE);
 
         Serial.print("Logo print (ms): ");
         unsigned long start = millis();
-        tft.drawRGBBitmap(46, 40, LogoBitmap_b, LogoWid_b, LogoHei_b);
+        tft.drawRGBBitmap(46, 40, LogoBitmap_w, LogoWid_w, LogoHei_w);
         Serial.println(millis() - start);
 
         tft.setFont(&AvenirNextLTPro_Regular16pt7b);
-        tft.setTextColor(ILI9341_WHITE,ILI9341_BLACK);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
         tft.setCursor( 50,227);   tft.print("Welcome");
 
         tft.setFont(&AvenirNextLTPro_Regular8pt7b);
-        tft.setTextColor(ILI9341_WHITE,ILI9341_BLACK);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
         tft.setCursor( 52,258);   tft.print("Click to get started");
 
         fadePWM(DISP_LED, true, 500);
