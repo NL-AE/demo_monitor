@@ -26,6 +26,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, DISP_RST);
 #include "Logo_w_small.h"
 
 // generated with https://rop.nl/truetype2gfx/
+#include "AvenirNextLTPro_Regular6pt7b.h"
 #include "AvenirNextLTPro_Regular8pt7b.h"
 #include "AvenirNextLTPro_Regular12pt7b.h"
 #include "AvenirNextLTPro_Regular16pt7b.h"
@@ -367,10 +368,89 @@ void loop(void) {
 
       }
       dispDrawn = 1;
-      // delay(750);
+      delay(750);
+      ScreenState = PREV_RESULTS;
+      dispDrawn = 0;
       break;
 
     case PREV_RESULTS:
+      if(dispDrawn==0){
+        // tft.fillScreen(ILI9341_WHITE);
+        tft.fillRect(0,0,240,45,ILI9341_Custom_B);
+        tft.fillRect(0,45,240,275,ILI9341_WHITE);
+
+        tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_WHITE,ILI9341_Custom_B);
+        tft.setCursor( 35, 26);   tft.print("Previous Measurements");
+
+        // graph
+        tft.setFont(&AvenirNextLTPro_Regular6pt7b);
+        tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
+        tft.setCursor(20, 71);   tft.print("7");
+        tft.setCursor(20, 83);   tft.print("6");
+        tft.setCursor(20, 95);   tft.print("5");
+        tft.setCursor(20,107);   tft.print("4");
+        tft.setCursor(20,119);   tft.print("3");
+        tft.setCursor(20,131);   tft.print("2");
+        tft.setCursor(20,143);   tft.print("1");
+        tft.setCursor(20,157);   tft.print("0");
+
+        tft.drawLine(30, 62, 30, 154, ILI9341_BLACK);
+        tft.drawLine(31, 62, 31, 154, ILI9341_BLACK);
+
+        tft.drawLine(30, 153, 210, 153, ILI9341_BLACK);
+        tft.drawLine(30, 154, 210, 154, ILI9341_BLACK);
+
+        // colored background
+        // tft.fillRect(32, 68,178,14,tft.color565(229,190,194));
+        // tft.fillRect(32, 82,178, 7,tft.color565(240,218,194));
+        // tft.fillRect(32, 89,178, 7,tft.color565(207,221,201));
+        // tft.fillRect(32, 96,178,21,tft.color565(204,217,211));
+        // tft.fillRect(32,117,178, 7,tft.color565(207,221,201));
+        // tft.fillRect(32,124,178, 7,tft.color565(240,218,194));
+        // tft.fillRect(32,131,178,22,tft.color565(229,190,194));
+
+        // grey background
+        tft.fillRect(32, 92,178, 18,tft.color565(220,220,220));
+        tft.drawLine(32, 92,210, 92,tft.color565(190,190,190));
+        tft.drawLine(32,110,210,110,tft.color565(190,190,190));
+
+        // plot dots and lines on graph
+        uint16_t plot_results[] = {320,480,470,365,514,454,326,432};
+        int plot_y;
+        int plot_x;
+
+        for(int i=0; i<8; i++){
+          int plot_y_prev = plot_y;
+          int plot_x_prev = plot_x;
+
+          // calculate x/y position
+          plot_y = map(plot_results[i],0,700,153,68);
+          plot_x = 40 + i*23;
+
+          // draw circle
+          tft.fillCircle(plot_x, plot_y, 2, ILI9341_Custom_B);
+
+          // draw line
+          if(i>0 && i<8){
+            tft.drawLine(plot_x_prev, plot_y_prev, plot_x, plot_y, ILI9341_Custom_B);
+          }
+        }
+
+        // table
+        tft.drawLine(18, 170, 222, 170, ILI9341_BLACK);
+        tft.drawLine(18, 171, 222, 171, ILI9341_BLACK);
+
+        tft.setFont(&AvenirNextLTPro_Regular8pt7b);
+        tft.setTextColor(ILI9341_BLACK);
+        tft.setCursor( 21, 190);   tft.print("Jul. 22 2025");
+        tft.setCursor( 21, 210);   tft.print("Jul. 24 2025");
+        tft.setCursor( 21, 230);   tft.print("Jul. 28 2025");
+        tft.setCursor( 21, 250);   tft.print("Aug. 01 2025");
+        tft.setCursor( 21, 270);   tft.print("Aug. 03 2025");
+        tft.setCursor( 21, 290);   tft.print("Aug. 04 2025");
+      }
+      dispDrawn = 1;
       break;
   }
 
