@@ -71,13 +71,79 @@ void fadePWM(int pin, bool fadeIn, int fadeTimeMillis) {
   }
 }
 
+// Buttons
+#define Button_Pow  0
+#define Button_Up   1
+#define Button_Dn   2
+
+volatile uint32_t last_interrupt_time_pow = 0;
+volatile uint32_t last_interrupt_time_dn = 0;
+volatile uint32_t last_interrupt_time_up = 0;
+const uint32_t debounce_delay_ms = 300; // debounce time
+
+void Button_Pow_ISR() {
+    uint32_t current_time = millis();
+
+    if (current_time - last_interrupt_time_pow > debounce_delay_ms) {
+        Serial.println("power button pressed");
+
+        dispDrawn = 0;
+
+        ScreenState = ScreenState+1;
+
+        if(ScreenState >= 8){
+          ScreenState = 0;
+        }
+
+        last_interrupt_time_pow = current_time;
+    }
+}
+
+void Button_Up_ISR() {
+    uint32_t current_time = millis();
+
+    if (current_time - last_interrupt_time_dn > debounce_delay_ms) {
+        Serial.println("up button pressed");
+
+        cursor_pos = cursor_pos-1;    // n.b. highest option is cursor_pos = 0. next one down is cursor_pos = 1 so need to -1 to move upwards
+        if(cursor_pos < 0){
+          cursor_pos = 3;
+        }
+        
+        last_interrupt_time_dn = current_time;
+    }
+}
+
+void Button_Dn_ISR() {
+    uint32_t current_time = millis();
+
+    if (current_time - last_interrupt_time_up > debounce_delay_ms) {
+        Serial.println("down button pressed");
+
+        cursor_pos = cursor_pos+1;
+        if(cursor_pos >= 4){
+          cursor_pos = 0;
+        }
+
+        last_interrupt_time_up = current_time;
+    }
+}
+
 /**************************************************************************/
 /*                                  SETUP                                 */
 /**************************************************************************/
 
 void setup(void) {
   // Serial
-  // Serial.begin(115200);
+  Serial.begin(115200);
+
+  pinMode(Button_Pow, INPUT_PULLUP);
+  pinMode(Button_Up, INPUT_PULLUP);
+  pinMode(Button_Dn, INPUT_PULLUP);
+
+  attachInterrupt(digitalPinToInterrupt(Button_Pow), Button_Pow_ISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(Button_Up), Button_Up_ISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(Button_Dn), Button_Dn_ISR, FALLING);
 
   pinMode(DISP_LED, OUTPUT);
   pinMode(DISP_POW, OUTPUT);
@@ -92,7 +158,7 @@ void setup(void) {
   tft.fillScreen(ILI9341_WHITE);
   // fadePWM(DISP_LED, true, 500);
 
-  ScreenState = RESULTS;
+  ScreenState = WELCOME;
 }
 
 /**************************************************************************/
@@ -115,18 +181,8 @@ void loop(void) {
         tft.setFont(&AvenirNextLTPro_Regular8pt7b);
         tft.setTextColor(ILI9341_BLACK,ILI9341_WHITE);
         tft.setCursor( 52,258);   tft.print("Click to get started");
-
-        fadePWM(DISP_LED, true, 500);
       }
       dispDrawn = 1;
-
-      // wait
-      delay(1000);
-
-      // transition to next screen
-      ScreenState = WELCOME_MENU;
-      dispDrawn = 0;
-
       break;
 
     case WELCOME_MENU:
@@ -174,14 +230,6 @@ void loop(void) {
           break;
       }
 
-      delay(1000);
-      cursor_pos = cursor_pos + 1;
-      if(cursor_pos == 4){
-        cursor_pos = 0;
-        ScreenState = TUTORIAL_1;
-        dispDrawn = 0;
-      }
-
       break;
 
     case TUTORIAL_1:
@@ -209,9 +257,6 @@ void loop(void) {
         tft.setCursor( 60,290);   tft.print("Click to continue");
       }
       dispDrawn = 1;
-      delay(1000);
-      ScreenState = TUTORIAL_2;
-      dispDrawn = 0;
       break;
 
     case TUTORIAL_2:
@@ -266,9 +311,6 @@ void loop(void) {
         tft.setCursor( 60,290);   tft.print("Click to continue");
       }
       dispDrawn = 1;
-      delay(1000);
-      ScreenState = TUTORIAL_3;
-      dispDrawn = 0;
       break;
 
     case TUTORIAL_3:
@@ -296,10 +338,6 @@ void loop(void) {
         tft.setCursor( 30,245);   tft.print("3. Click button to measure");
       }
       dispDrawn = 1;
-
-      delay(1000);
-      dispDrawn = 0;
-      ScreenState = MEASURING;
       break;
     
     case MEASURING:
@@ -324,10 +362,11 @@ void loop(void) {
           tft.setCursor( 35,235);   tft.print("Measuring...");
           break;
       }
-      delay(333);
+      delay(500);
       MeasuringState = MeasuringState + 1;
       if(MeasuringState == 3){
         MeasuringState = 0;
+        delay(500);
         ScreenState = RESULTS;
         dispDrawn = 0;
       }
@@ -368,9 +407,6 @@ void loop(void) {
 
       }
       dispDrawn = 1;
-      delay(750);
-      ScreenState = PREV_RESULTS;
-      dispDrawn = 0;
       break;
 
     case PREV_RESULTS:
