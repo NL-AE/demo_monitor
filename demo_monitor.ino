@@ -477,6 +477,12 @@ void loop(void) {
         tft.drawLine(18, 170, 222, 170, ILI9341_BLACK);
         tft.drawLine(18, 171, 222, 171, ILI9341_BLACK);
 
+        tft.fillRect(18,195,204,20,tft.color565(220,220,220));
+        tft.fillRect(18,235,204,20,tft.color565(220,220,220));
+        tft.fillRect(18,275,204,20,tft.color565(220,220,220));
+
+        tft.fillTriangle(110,302,126,302,118,310,ILI9341_BLACK);
+
         tft.setFont(&AvenirNextLTPro_Regular8pt7b);
         tft.setTextColor(ILI9341_BLACK);
         tft.setCursor( 21, 190);   tft.print("Jul. 22 2025");
@@ -485,6 +491,13 @@ void loop(void) {
         tft.setCursor( 21, 250);   tft.print("Aug. 01 2025");
         tft.setCursor( 21, 270);   tft.print("Aug. 03 2025");
         tft.setCursor( 21, 290);   tft.print("Aug. 04 2025");
+
+        tft.setCursor(180, 190);   tft.print("4.70");
+        tft.setCursor(180, 210);   tft.print("3.65");
+        tft.setCursor(180, 230);   tft.print("5.14");
+        tft.setCursor(180, 250);   tft.print("4.54");
+        tft.setCursor(180, 270);   tft.print("3.26");
+        tft.setCursor(180, 290);   tft.print("4.32");
       }
       dispDrawn = 1;
       break;
