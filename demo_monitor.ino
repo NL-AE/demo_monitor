@@ -37,7 +37,7 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, DISP_RST);
 
 // Sleep
 volatile unsigned long lastActivityTime = 0; 
-const unsigned long sleepDelay = 10000;   // ms before going to sleep
+const unsigned long sleepDelay = 20000;   // ms before going to sleep
 
 // Variables
 enum ScreenState{
@@ -204,6 +204,8 @@ void loop(void) {
         tft.setCursor( 46,234);   tft.print("See previous results");
         tft.setCursor( 46,258);   tft.print("Connect to phone");
         tft.setCursor( 46,282);   tft.print("Settings");
+
+        cursor_pos = 0;   // reset cursor position so it always 0
       }
       dispDrawn = 1;
 
