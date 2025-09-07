@@ -35,6 +35,10 @@ Adafruit_ILI9341 tft = Adafruit_ILI9341(DISP_CSL, DISP_DCP, DISP_RST);
 
 #define ILI9341_Custom_B tft.color565(39,47,83)
 
+// Sleep
+volatile unsigned long lastActivityTime = 0; 
+const unsigned long sleepDelay = 10000;   // ms before going to sleep
+
 // Variables
 enum ScreenState{
   WELCOME,
@@ -82,6 +86,7 @@ volatile uint32_t last_interrupt_time_up = 0;
 const uint32_t debounce_delay_ms = 300; // debounce time
 
 void Button_Pow_ISR() {
+  lastActivityTime = millis();
     uint32_t current_time = millis();
 
     if (current_time - last_interrupt_time_pow > debounce_delay_ms) {
@@ -100,6 +105,7 @@ void Button_Pow_ISR() {
 }
 
 void Button_Up_ISR() {
+  lastActivityTime = millis();
     uint32_t current_time = millis();
 
     if (current_time - last_interrupt_time_dn > debounce_delay_ms) {
@@ -115,6 +121,7 @@ void Button_Up_ISR() {
 }
 
 void Button_Dn_ISR() {
+  lastActivityTime = millis();
     uint32_t current_time = millis();
 
     if (current_time - last_interrupt_time_up > debounce_delay_ms) {
@@ -504,4 +511,19 @@ void loop(void) {
   }
 
   delay(10);
+
+  // go to sleep
+  if (millis() - lastActivityTime > sleepDelay) {
+    digitalWrite(DISP_LED,0);
+    tft.fillScreen(ILI9341_BLACK);
+    digitalWrite(DISP_POW,0);
+
+    esp_deep_sleep_enable_gpio_wakeup(((1ULL << GPIO_NUM_0) | 
+                                       (1ULL << GPIO_NUM_1) | 
+                                       (1ULL << GPIO_NUM_2)), 
+                                       ESP_GPIO_WAKEUP_GPIO_LOW);
+
+    Serial.println("sleepy time");
+    esp_deep_sleep_start(); 
+  }
 }
