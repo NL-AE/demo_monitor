@@ -87,53 +87,53 @@ const uint32_t debounce_delay_ms = 300; // debounce time
 
 void Button_Pow_ISR() {
   lastActivityTime = millis();
-    uint32_t current_time = millis();
+  uint32_t current_time = millis();
 
-    if (current_time - last_interrupt_time_pow > debounce_delay_ms) {
-        Serial.println("power button pressed");
+  if (current_time - last_interrupt_time_pow > debounce_delay_ms) {
+      Serial.println("power button pressed");
 
-        dispDrawn = 0;
+      dispDrawn = 0;
 
-        ScreenState = ScreenState+1;
+      ScreenState = ScreenState+1;
 
-        if(ScreenState >= 8){
-          ScreenState = 0;
-        }
+      if(ScreenState >= 8){
+        ScreenState = 0;
+      }
 
-        last_interrupt_time_pow = current_time;
-    }
+      last_interrupt_time_pow = current_time;
+  }
 }
 
 void Button_Up_ISR() {
   lastActivityTime = millis();
-    uint32_t current_time = millis();
+  uint32_t current_time = millis();
 
-    if (current_time - last_interrupt_time_dn > debounce_delay_ms) {
-        Serial.println("up button pressed");
+  if (current_time - last_interrupt_time_dn > debounce_delay_ms) {
+      Serial.println("up button pressed");
 
-        cursor_pos = cursor_pos-1;    // n.b. highest option is cursor_pos = 0. next one down is cursor_pos = 1 so need to -1 to move upwards
-        if(cursor_pos < 0){
-          cursor_pos = 3;
-        }
-        
-        last_interrupt_time_dn = current_time;
-    }
+      cursor_pos = cursor_pos-1;    // n.b. highest option is cursor_pos = 0. next one down is cursor_pos = 1 so need to -1 to move upwards
+      if(cursor_pos < 0){
+        cursor_pos = 3;
+      }
+      
+      last_interrupt_time_dn = current_time;
+  }
 }
 
 void Button_Dn_ISR() {
   lastActivityTime = millis();
-    uint32_t current_time = millis();
+  uint32_t current_time = millis();
 
-    if (current_time - last_interrupt_time_up > debounce_delay_ms) {
-        Serial.println("down button pressed");
+  if (current_time - last_interrupt_time_up > debounce_delay_ms) {
+      Serial.println("down button pressed");
 
-        cursor_pos = cursor_pos+1;
-        if(cursor_pos >= 4){
-          cursor_pos = 0;
-        }
+      cursor_pos = cursor_pos+1;
+      if(cursor_pos >= 4){
+        cursor_pos = 0;
+      }
 
-        last_interrupt_time_up = current_time;
-    }
+      last_interrupt_time_up = current_time;
+  }
 }
 
 /**************************************************************************/
